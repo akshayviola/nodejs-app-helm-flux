@@ -5,3 +5,6 @@ resources:
 - gotk-sync.yaml
 - gitrepository.yaml
 - helmrelease.yaml
+- image-repository.yaml
+- image-policy.yaml
+- image-update-automation.yaml
