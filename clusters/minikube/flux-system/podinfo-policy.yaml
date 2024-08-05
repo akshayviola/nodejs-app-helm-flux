@@ -9,4 +9,4 @@ spec:
     name: nodejs-app
   policy:
     semver:
-      range: ">=0.0.0"
+      range: "1.0.x"
