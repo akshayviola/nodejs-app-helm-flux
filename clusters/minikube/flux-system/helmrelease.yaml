@@ -18,4 +18,4 @@ spec:
   values:
     image:
       repository: akshay2001a/nodejs-app
-      tag: {{ .Values.image.tag }}
+      tag: latest
