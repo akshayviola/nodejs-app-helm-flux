@@ -18,4 +18,4 @@ spec:
   values:
     image:
       repository: akshay2001a/nodejs-app
-      tag: latest
+      tag: "16"
