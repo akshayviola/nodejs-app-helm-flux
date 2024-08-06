@@ -8,7 +8,7 @@ app.get('/', (req, res) => {
     <!DOCTYPE html>
     <html>
     <head>
-      <title>Styled Page</title>
+      <title>akshay</title>
       <style>
         /* Inline CSS to change the text color */
         body {
@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
       </style>
     </head>
     <body>
-      <h1>Hello from Flux</h1>
+      <h1>ta da ...everything works</h1>
     </body>
     </html>
   `);
