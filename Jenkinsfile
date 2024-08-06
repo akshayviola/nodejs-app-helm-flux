@@ -40,5 +40,13 @@ pipeline {
                 }
             }
         }
+        stage('Restart Kubernetes Deployment') {
+            steps {
+                script {
+                    // Restart the Kubernetes deployment
+                    sh "kubectl rollout restart deployment nodejs-app -n flux-system"
+                }
+            }
+        }
     }
 }
