@@ -49,7 +49,7 @@ pipeline {
             steps {
                 script {
                     // Fetch and merge changes from the remote repository
-                    sh "cd /path/to/your/local/repo" // Navigate to your local repo
+                    sh "/home/user/Desktop/2Clouds /Helm_Jenkins_Task/nodejs-app-helm-flux" // Navigate to your local repo
                     sh "git fetch origin"
                     sh "git merge origin/main"
                 }
