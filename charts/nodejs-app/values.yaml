@@ -2,7 +2,11 @@ replicaCount: 1
 
 image:
   repository: akshay2001a/nodejs-app
+<<<<<<< HEAD
   tag: "21"
+=======
+  tag: "latest"
+>>>>>>> 66a95bc (tag update 1)
   pullPolicy: Always
 
 service:
