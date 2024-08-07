@@ -24,10 +24,10 @@ pipeline {
         stage('Update Values and Helm Release') {
             steps {
                 script {
-                    // Update the image tag in values.yaml
+                    // Update the image tag in `values.yaml`
                     sh "sed -i 's/tag:.*/tag: \"${env.BUILD_ID}\"/' ${HELM_CHART_PATH}/values.yaml"
                     
-                    // Update the image tag in helmrelease.yaml
+                    // Update the image tag in `helmrelease.yaml`
                     sh "sed -i 's/tag: .*/tag: \"${env.BUILD_ID}\"/' ${HELM_RELEASE_PATH}"
                     
                     // Configure Git user details
@@ -45,16 +45,6 @@ pipeline {
                 }
             }
         }
-  stage('Fetch and Merge Changes') {
-            steps {
-                script {
-                    // Fetch and merge changes from the remote repository
-                    sh "/home/user/Desktop/jenkins/workspace/nodejs-app-helm-flux@tmp" // Navigate to your local repo
-                    sh "git fetch origin"
-                    sh "git merge origin/main"
-                }
-            }
-        }
         stage('Restart Kubernetes Deployment') {
             steps {
                 script {
@@ -65,3 +55,5 @@ pipeline {
         }
     }
 }
+
+
