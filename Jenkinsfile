@@ -46,7 +46,6 @@ pipeline {
             }
         }
   stage('Fetch and Merge Changes') {
-            agent { label 'local' }  // Use local agent for this stage
             steps {
                 script {
                     // Fetch and merge changes from the remote repository
