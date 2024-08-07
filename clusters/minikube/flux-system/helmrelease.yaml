@@ -18,5 +18,5 @@ spec:
   values:
     image:
       repository: akshay2001a/nodejs-app
-      tag: "35"
+      tag: "36"
 
