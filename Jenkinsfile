@@ -24,34 +24,27 @@ pipeline {
         stage('Update Values and Helm Release') {
             steps {
                 script {
-                    // Clone the repository to ensure we are working with the latest state
-                    sh "git clone ${GIT_REPO} temp-repo"
-                    dir('temp-repo') {
-                        // Configure Git user details
-                        sh "git config --global user.email 'akshaysunil201@gmail.com'"
-                        sh "git config --global user.name 'akshayviola'"
+                    // Update the image tag in `values.yaml`
+                    sh "sed -i 's/tag:.*/tag: \"${env.BUILD_ID}\"/' ${HELM_CHART_PATH}/values.yaml"
+                    
+                    // Update the image tag in `helmrelease.yaml`
+                    sh "sed -i 's/tag: .*/tag: \"${env.BUILD_ID}\"/' ${HELM_RELEASE_PATH}"
+                    
+                    // Configure Git user details
+                    sh "git config --global user.email 'akshaysunil201@gmail.com'"
+                    sh "git config --global user.name 'akshayviola'"
+                    
+                    // Add, commit, and push changes to the Git repository
+                    withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                        sh "git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/akshayviola/nodejs-app-helm-flux.git"
+                        sh "git add ${HELM_CHART_PATH}/values.yaml"
+                        sh "git add ${HELM_RELEASE_PATH}"
+                        sh "git commit -m 'Update image tag to ${env.BUILD_ID} in values.yaml and helmrelease.yaml'"
+                        sh "git push origin HEAD:main"
                         
-                        // Fetch the latest changes from the remote repository
+                        // Fetch and merge changes from the remote repository
                         sh "git fetch origin"
-                        
-                        // Checkout the main branch and merge changes
-                        sh "git checkout main"
                         sh "git merge origin/main"
-                        
-                        // Update the image tag in `values.yaml`
-                        sh "sed -i 's/tag:.*/tag: \"${env.BUILD_ID}\"/' ${HELM_CHART_PATH}/values.yaml"
-                        
-                        // Update the image tag in `helmrelease.yaml`
-                        sh "sed -i 's/tag: .*/tag: \"${env.BUILD_ID}\"/' ${HELM_RELEASE_PATH}"
-                        
-                        // Add, commit, and push changes to the Git repository
-                        withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                            sh "git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/akshayviola/nodejs-app-helm-flux.git"
-                            sh "git add ${HELM_CHART_PATH}/values.yaml"
-                            sh "git add ${HELM_RELEASE_PATH}"
-                            sh "git commit -m 'Update image tag to ${env.BUILD_ID} in values.yaml and helmrelease.yaml'"
-                            sh "git push origin main"
-                        }
                     }
                 }
             }
