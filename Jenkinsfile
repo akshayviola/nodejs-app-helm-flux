@@ -10,13 +10,25 @@ pipeline {
         DOCKERFILE_PATH = "nodejs-app/Dockerfile"  // Path to Dockerfile
     }
     stages {
+        stage('Clone Repository') {
+            steps {
+                script {
+                    // Clone the Git repository
+                    withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                        sh "git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/akshayviola/nodejs-app-helm-flux.git"
+                    }
+                }
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
-                        def app = docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}", "-f ${DOCKERFILE_PATH} nodejs-app")
-                        app.push("latest") // Push the image with "latest" tag
-                        app.push("${env.BUILD_ID}") // Push the image with build ID tag
+                    dir('nodejs-app-helm-flux') {
+                        docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
+                            def app = docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}", "-f ${DOCKERFILE_PATH} nodejs-app")
+                            app.push("latest") // Push the image with "latest" tag
+                            app.push("${env.BUILD_ID}") // Push the image with build ID tag
+                        }
                     }
                 }
             }
@@ -24,23 +36,37 @@ pipeline {
         stage('Update Values and Helm Release') {
             steps {
                 script {
-                    // Update the image tag in `values.yaml`
-                    sh "sed -i 's/tag:.*/tag: \"${env.BUILD_ID}\"/' ${HELM_CHART_PATH}/values.yaml"
-                    
-                    // Update the image tag in `helmrelease.yaml`
-                    sh "sed -i 's/tag: .*/tag: \"${env.BUILD_ID}\"/' ${HELM_RELEASE_PATH}"
-                    
-                    // Configure Git user details
-                    sh "git config --global user.email 'akshaysunil201@gmail.com'"
-                    sh "git config --global user.name 'akshayviola'"
-                    
-                    // Add, commit, and push changes to the Git repository
-                    withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                        sh "git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/akshayviola/nodejs-app-helm-flux.git"
-                        sh "git add ${HELM_CHART_PATH}/values.yaml"
-                        sh "git add ${HELM_RELEASE_PATH}"
-                        sh "git commit -m 'Update image tag to ${env.BUILD_ID} in values.yaml and helmrelease.yaml'"
-                        sh "git push origin HEAD:main"
+                    dir('nodejs-app-helm-flux') {
+                        // Update the image tag in `values.yaml`
+                        sh "sed -i 's/tag:.*/tag: \"${env.BUILD_ID}\"/' ${HELM_CHART_PATH}/values.yaml"
+                        
+                        // Update the image tag in `helmrelease.yaml`
+                        sh "sed -i 's/tag: .*/tag: \"${env.BUILD_ID}\"/' ${HELM_RELEASE_PATH}"
+                        
+                        // Configure Git user details
+                        sh "git config --global user.email 'akshaysunil201@gmail.com'"
+                        sh "git config --global user.name 'akshayviola'"
+                        
+                        // Add, commit, and push changes to the Git repository
+                        withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                            sh "git add ${HELM_CHART_PATH}/values.yaml"
+                            sh "git add ${HELM_RELEASE_PATH}"
+                            sh "git commit -m 'Update image tag to ${env.BUILD_ID} in values.yaml and helmrelease.yaml'"
+                            sh "git push origin HEAD:main"
+                        }
+                    }
+                }
+            }
+        }
+        stage('Fetch and Merge Changes') {
+            steps {
+                script {
+                    dir('nodejs-app-helm-flux') {
+                        // Fetch and merge changes from the remote repository
+                        withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                            sh "git fetch origin"
+                            sh "git merge origin/main"
+                        }
                     }
                 }
             }
@@ -49,8 +75,6 @@ pipeline {
             steps {
                 script {
                     // Restart the Kubernetes deployment
-		    sh "git fetch origin"
-		    sh "git merge origin/main"
                     sh "kubectl rollout restart deployment nodejs-app -n flux-system"
                 }
             }
