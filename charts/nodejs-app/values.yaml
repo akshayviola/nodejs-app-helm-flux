@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: akshay2001a/nodejs-app
-  tag: "28"
+  tag: "29"
   pullPolicy: Always
 
 service:
