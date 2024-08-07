@@ -15,10 +15,8 @@ spec:
         name: nodejs-app
         namespace: flux-system
       interval: 1m
-  valuesFrom:
-  - kind: ConfigMap
-    name: values
-    valuesKey: values.yaml
   values:
     image:
       repository: akshay2001a/nodejs-app
+      tag: "latest"
+
