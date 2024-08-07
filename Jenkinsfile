@@ -41,8 +41,16 @@ pipeline {
                         sh "git add ${HELM_RELEASE_PATH}"
                         sh "git commit -m 'Update image tag to ${env.BUILD_ID} in values.yaml and helmrelease.yaml'"
                         sh "git push origin HEAD:main"
-                        
-                        // Fetch and merge changes from the remote repository
+                    }
+                }
+            }
+        }
+        stage('Fetch and Merge Changes') {
+            steps {
+                script {
+                    // Fetch and merge changes from the remote repository
+                    withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                        sh "git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/akshayviola/nodejs-app-helm-flux.git"
                         sh "git fetch origin"
                         sh "git merge origin/main"
                     }
