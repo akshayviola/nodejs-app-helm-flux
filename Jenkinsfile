@@ -6,6 +6,7 @@ pipeline {
         GIT_CREDENTIALS_ID = "36ff0bcd-3a76-47d6-a5a7-7315f966b7ba"  // Use the correct Git credentials ID
         GIT_REPO = "https://github.com/akshayviola/nodejs-app-helm-flux.git"
         HELM_CHART_PATH = "charts/nodejs-app"
+        HELM_RELEASE_PATH = "clusters/minikube/flux-system/helmrelease.yaml"  // Path to helmrelease.yaml
         DOCKERFILE_PATH = "nodejs-app/Dockerfile"  // Path to Dockerfile
     }
     stages {
@@ -19,20 +20,22 @@ pipeline {
                 }
             }
         }
-        stage('Update Helm Chart') {
+        stage('Update Values and Helm Release') {
             steps {
                 script {
+                    // Update the image tag in `values.yaml`
                     sh "sed -i 's/tag:.*/tag: \"${env.BUILD_ID}\"/' ${HELM_CHART_PATH}/values.yaml"
-                    sh "sed -i 's/tag: .*/tag: \"${env.BUILD_ID}\"/' ${HELM_RELEASE_PATH}" 
+                    // Update the image tag in `helmrelease.yaml`
+                    sh "sed -i 's/tag: .*/tag: \"${env.BUILD_ID}\"/' ${HELM_RELEASE_PATH}"
                     // Configure Git user details
                     sh "git config --global user.email 'akshaysunil201@gmail.com'"
                     sh "git config --global user.name 'akshayviola'"
-                    
                     // Add, commit, and push changes to the Git repository
                     withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                         sh "git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/akshayviola/nodejs-app-helm-flux.git"
                         sh "git add ${HELM_CHART_PATH}/values.yaml"
-                        sh "git commit -m 'Update Helm chart image tag to ${env.BUILD_ID}'"
+                        sh "git add ${HELM_RELEASE_PATH}"
+                        sh "git commit -m 'Update image tag to ${env.BUILD_ID} in values.yaml and helmrelease.yaml'"
                         sh "git push origin HEAD:main"
                     }
                 }
