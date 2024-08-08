@@ -22,9 +22,8 @@ pipeline {
         stage('Update Helm Chart') {
             steps {
                 script {
-                    // Use `sed` to update the image tag in `values.yaml`
                     sh "sed -i 's/tag:.*/tag: \"${env.BUILD_ID}\"/' ${HELM_CHART_PATH}/values.yaml"
-                    
+                    sh "sed -i 's/tag: .*/tag: \"${env.BUILD_ID}\"/' ${HELM_RELEASE_PATH}" 
                     // Configure Git user details
                     sh "git config --global user.email 'akshaysunil201@gmail.com'"
                     sh "git config --global user.name 'akshayviola'"
