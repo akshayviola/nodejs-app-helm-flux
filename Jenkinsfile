@@ -45,7 +45,6 @@ pipeline {
             }
         }
         stage('Run Update Script') {
-            agent { label 'local' }  // Use the local agent for this stage
             steps {
                 script {
                     // Execute the update script
