@@ -1,0 +1,68 @@
+---
+# Source: nodejs-app/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodejs-app
+  labels:
+    app.kubernetes.io/name: nodejs-app
+    app.kubernetes.io/instance: nodejs-app
+    app.kubernetes.io/version: 0.1.0
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 3000
+      nodePort: 30007
+  selector:
+    app: nodejs-app
+---
+# Source: nodejs-app/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-app
+  labels:
+    app.kubernetes.io/name: nodejs-app
+    app.kubernetes.io/instance: nodejs-app
+    app.kubernetes.io/version: 0.1.0
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nodejs-app
+  template:
+    metadata:
+      labels:
+        app: nodejs-app
+    spec:
+      containers:
+        - name: nodejs-app
+          image: "akshay2001a/nodejs-app:54"
+          ports:
+            - containerPort: 3000
+          resources:
+            {}
+---
+# Source: nodejs-app/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nodejs-app-ingress
+  namespace: flux-system  # Set the namespace for the Ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: nodejs-app.local  # Use your desired host or domain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nodejs-app
+            port:
+              number: 80
