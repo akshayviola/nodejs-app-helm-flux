@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
       </style>
     </head>
     <body>
-      <h1>ta da ...everything works!!!!</h1>
+      <h1>ta da ...everything works!, hello from flux</h1>
     </body>
     </html>
   `);
