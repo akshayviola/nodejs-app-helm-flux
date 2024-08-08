@@ -25,11 +25,14 @@ pipeline {
                 script {
                     // Update the image tag in `values.yaml`
                     sh "sed -i 's/tag:.*/tag: \"${env.BUILD_ID}\"/' ${HELM_CHART_PATH}/values.yaml"
+                    
                     // Update the image tag in `helmrelease.yaml`
                     sh "sed -i 's/tag: .*/tag: \"${env.BUILD_ID}\"/' ${HELM_RELEASE_PATH}"
+                    
                     // Configure Git user details
                     sh "git config --global user.email 'akshaysunil201@gmail.com'"
                     sh "git config --global user.name 'akshayviola'"
+                    
                     // Add, commit, and push changes to the Git repository
                     withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                         sh "git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/akshayviola/nodejs-app-helm-flux.git"
@@ -38,6 +41,15 @@ pipeline {
                         sh "git commit -m 'Update image tag to ${env.BUILD_ID} in values.yaml and helmrelease.yaml'"
                         sh "git push origin HEAD:main"
                     }
+                }
+            }
+        }
+        stage('Run Update Script') {
+            agent { label 'local' }  // Use the local agent for this stage
+            steps {
+                script {
+                    // Execute the update script
+                    sh "/home/user/Desktop/2Clouds /Helm_Jenkins_Task/nodejs-app-helm-flux/update_repo.sh"
                 }
             }
         }
