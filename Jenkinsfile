@@ -48,7 +48,7 @@ pipeline {
             steps {
                 script {
                     // Execute the update script
-                    sh "/home/user/Desktop/2Clouds /Helm_Jenkins_Task/nodejs-app-helm-flux/update_repo.sh"
+                    sh "/home/user/Desktop/2Clouds/Helm_Jenkins_Task/nodejs-app-helm-flux/update_repo.sh"
                 }
             }
         }
